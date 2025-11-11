@@ -1,7 +1,3 @@
-¡Claro que sí\! Con gusto te proporciono una base sólida sobre **Haskell** y un resumen claro de los pasos a seguir para construir tu proyecto **FunCat**.
-
------
-
 ## 💡 Introducción a Haskell: Programación Funcional Pura
 
 **Haskell** es un lenguaje de programación funcional estandarizado, conocido por su **pureza** y su robusto sistema de tipos. Es ideal para tu materia porque fuerza la aplicación estricta de los principios funcionales.
@@ -44,5 +40,3 @@ Cuando un usuario suba una imagen:
 4.  **Python** captura `Persian` y lo muestra en la interfaz web.
 
 Esto asegura que todo el **algoritmo matemático y la lógica de decisión** residan en el código puro de Haskell.
-
-¿Quieres que empecemos con la definición de tipos en Haskell y el *parsing* básico de los datos de entrenamiento?

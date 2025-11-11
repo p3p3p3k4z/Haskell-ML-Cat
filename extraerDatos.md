@@ -1,12 +1,6 @@
-¡Muy buena pregunta\! En cualquier proyecto de Machine Learning, la calidad y el etiquetado de los datos son **absolutamente cruciales**.
-
-Aquí tienes mis recomendaciones sobre dónde extraer los datos de imágenes de gatos y por qué es **imprescindible** que estén etiquetados:
-
------
-
 ## 💾 Extracción y Origen de los Datos (Imágenes de Gatos)
 
-Dado que estás haciendo un proyecto académico, no necesitas millones de imágenes, pero sí una calidad y variedad razonables para cada clase.
+Se necesita una cantidad considerable de imagenes.
 
 ### 1\. Conjuntos de Datos Públicos Recomendados
 
@@ -39,7 +33,7 @@ La clasificación que estás haciendo es un tipo de **Aprendizaje Supervisado**.
 | **Votación KNN** | Cuando el algoritmo KNN encuentra los $K$ vecinos más cercanos, solo puede realizar el voto mayoritario si sabe cuáles son las etiquetas de esos vecinos. |
 | **Evaluación** | Para calcular la **precisión** de tu modelo (en la Fase 3), necesitas comparar la etiqueta que **predijo** Haskell con la etiqueta **verdadera** del conjunto de prueba. |
 
-### Conclusión para tu Proyecto
+### Conclusión para el Proyecto
 
 Necesitas que cada imagen que uses para entrenar y evaluar tu modelo esté organizada y etiquetada claramente antes de que Python extraiga las características.
 
@@ -50,7 +44,3 @@ etiqueta,valor_f1,valor_f2,...,valor_fn
 Persian,0.12,0.88,0.45,...
 NotCat,0.90,0.10,0.22,...
 ```
-
-La recomendación es comenzar buscando un conjunto de datos en **Kaggle** que ya venga con las imágenes separadas en carpetas con los nombres de las razas.
-
-¿Quieres que busquemos un conjunto de datos específico para la clasificación de razas de gatos que puedas usar como punto de partida?

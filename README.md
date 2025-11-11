@@ -1,10 +1,4 @@
-¡Absolutamente! Con la inclusión de la clasificación multi-clase (razas de gatos) y la interfaz web usando Python, el plan necesita ser actualizado.
-
-Aquí está el **README.md** revisado para el proyecto **FunCat**, detallando la arquitectura híbrida y la comunicación entre Python y Haskell.
-
----
-
-# 🐱 Proyecto: Clasificador Funcional de Gatos (FunCat)
+# 🐱 Proyecto: Clasificador Funcional de Gatos
 
 ## 🎯 Objetivo del Proyecto
 
