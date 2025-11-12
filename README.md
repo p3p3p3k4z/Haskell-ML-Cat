@@ -4,6 +4,24 @@
 
 Implementar un clasificador de imágenes robusto utilizando la **Programación Funcional Pura** (Haskell) para el núcleo del algoritmo, y una interfaz web moderna (Python) para la interacción con el usuario. El objetivo final es clasificar una imagen de entrada como una raza específica de gato (e.g., Persa, Egipcio, Común) o como "No-Gato".
 
+### Requisitos
+- tener instalado el GHCup
+
+  curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+
+- crear entorno virtual
+  pip install opencv-python numpy
+
+
+### Test
+    cabal update
+    TEST_VECTOR=$(head -n 1 training_data.csv | cut -d ',' -f 2-)
+    cabal run fun_cat_classifier "$TEST_VECTOR"
+
+#### Crear binario
+    cabal install --installdir=. fun_cat_classifier
+
+
 ## 💡 Fundamentos Teóricos
 
 ### 1. Principios de Programación Funcional (Haskell)
@@ -25,7 +43,7 @@ El proyecto se centra en demostrar la capacidad de Haskell para construir algori
 
     Base: El algoritmo K-Nearest Neighbors (KNN) clasifica una nueva instancia (imagen) basándose en las clases de sus K vecinos más cercanos en el espacio de características.
 
-    Teoría Clave: Distancia Euclidiana La Distancia Euclidiana es la métrica utilizada para cuantificar la "similitud" entre el vector de características de la imagen a clasificar (q) y cada vector de características de las imágenes de entrenamiento (p).
+    Teoría Clave: La Distancia Euclidiana es la métrica utilizada para cuantificar la "similitud" entre el vector de características de la imagen a clasificar (q) y cada vector de características de las imágenes de entrenamiento (p).
 
     La fórmula, para dos puntos p y q en un espacio de n dimensiones (características), se define como:
     d(p,q)=i=1∑n​(pi​−qi​)2​

@@ -1,0 +1,24 @@
+cabal-version:   3.0
+
+-- Nombre de tu proyecto
+name:            Haskell-ML-Cat
+version:         0.1.0.0
+license:         MIT
+author:          m4r10
+
+-- Definición del ejecutable binario
+executable fun_cat_classifier
+    
+    main-is:          Main.hs
+    
+    other-modules:    Classifier
+    
+    -- Ruta a todas las carpetas de código fuente
+    hs-source-dirs:   src
+    
+    -- Lenguaje por defecto
+    default-language: GHC2021
+    
+    -- DEPENDENCIAS:
+    build-depends:    base >= 4.14,
+                      split
