@@ -10,17 +10,28 @@ Implementar un clasificador de imágenes robusto utilizando la **Programación F
   curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 
 - crear entorno virtual
-  pip install opencv-python numpy
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install -r requirements.txt
+ 
+- Explorador de archivos
+  sudo apt-get install zenity
 
+#### Extraer datos
+    python3 data_extractor.py
 
-### Test
+#### Test
     cabal update
     TEST_VECTOR=$(head -n 1 training_data.csv | cut -d ',' -f 2-)
     cabal run fun_cat_classifier "$TEST_VECTOR"
 
-#### Crear binario
+#### Crear binario (Modelo KNN)
+    cabal build
     cabal install --installdir=. fun_cat_classifier
 
+#### Correr ejecutable
+    python3 test.py     #modo simple
+    python3 simulation.py #interfaz
 
 ## 💡 Fundamentos Teóricos
 
