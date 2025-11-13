@@ -33,7 +33,7 @@ def main():
     histogram_bins = (8, 8, 8)
     
     MAX_IMAGES_PER_CAT_BREED = 500
-    MAX_IMAGES_PER_NOTCAT_SUBCLASS = 50 
+    MAX_IMAGES_PER_NOTCAT_SUBCLASS = 200 
     
     print(f"Iniciando extracción de características desde: {base_dir}")
     print(f"Guardando datos en: {output_csv}")

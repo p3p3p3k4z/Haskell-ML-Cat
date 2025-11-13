@@ -9,29 +9,26 @@ Implementar un clasificador de imágenes robusto utilizando la **Programación F
 
   curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 
-- crear entorno virtual
-  python3 -m venv venv
-  source venv/bin/activate
-  pip install -r requirements.txt
- 
+- crear entorno virtual 
+
+    python3 -m venv venv 
+    source venv/bin/activate 
+    pip install -r requirements.txt
+
 - Explorador de archivos
-  sudo apt-get install zenity
 
-#### Extraer datos
-    python3 data_extractor.py
+    sudo apt-get install zenity
 
-#### Test
+
+### Test
     cabal update
     TEST_VECTOR=$(head -n 1 training_data.csv | cut -d ',' -f 2-)
     cabal run fun_cat_classifier "$TEST_VECTOR"
 
-#### Crear binario (Modelo KNN)
+#### Crear binario
     cabal build
     cabal install --installdir=. fun_cat_classifier
 
-#### Correr ejecutable
-    python3 test.py     #modo simple
-    python3 simulation.py #interfaz
 
 ## 💡 Fundamentos Teóricos
 
@@ -73,8 +70,6 @@ El proyecto se divide en dos entornos que interactúan a través de la Línea de
 
 ### Diagrama de Flujo de Predicción
 
-
-
 1.  **Usuario** sube la imagen a la interfaz **Python/FastAPI**.
 2.  **Python** usa librerías de ML para extraer el vector de características de la imagen.
 3.  **Python** llama al programa compilado de Haskell (**`./fun_cat_classifier`**) a través de un *subproceso*, pasando el vector de características como argumento de **CLI**.
@@ -100,9 +95,8 @@ El proyecto se divide en dos entornos que interactúan a través de la Línea de
     * Parseé el vector de características de consulta desde los argumentos de la línea de comandos.
     * Imprima el resultado de la función `kNearestNeighbors` en `stdout`.
 
-### Fase 3: Interfaz Web (Python FastAPI/Flask)
+### Fase 3: Interfaz Pygame
 
-1.  **API REST:** Crear el *endpoint* `/predict` para manejar la solicitud `POST` y la carga del archivo de imagen.
 2.  **Orquestación:** Dentro del *endpoint* `/predict`:
     * Llamar a la función de extracción de características.
     * Utilizar `subprocess` para ejecutar el binario de Haskell con las características como argumento.
@@ -110,3 +104,26 @@ El proyecto se divide en dos entornos que interactúan a través de la Línea de
     * Devolver la predicción al usuario.
 
 Este enfoque garantiza que se cumplen todos los requisitos: Haskell para el núcleo funcional, clasificación multi-clase, y una interfaz moderna con Python.
+
+#### Otras tecnologias a explorar
+
+CNN 
+HaskellTorch
+JuicyPixels
+
+#### Posibles formas de usar
+Haskell
+Prolog
+CAML
+Orita
+
+Esto puede ser usado para:
+- reglas (factor de peso, redes neuronales)
+- inferencias
+- deduccion
+- creacion
+- restricciones
+- ia (old-fashion)
+- Algoritmo a-B
+- algoritmos de grafos
+- algoritmos de ordenamientos
