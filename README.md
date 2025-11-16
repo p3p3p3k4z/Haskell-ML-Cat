@@ -80,7 +80,7 @@ El proyecto se divide en dos entornos que interactúan a través de la Línea de
 | Componente | Lenguaje | Módulos Clave | Tarea Principal |
 | :--- | :--- | :--- | :--- |
 | **I/O, Extracción** | **Python** | `data_extractor.py` | Carga, Pre-procesamiento y Extracción de **Vectores de Características** (e.g., Histogramas de Color). |
-| **API Web** | **Python (Flask/FastAPI)** | `api.py` | Recibe la imagen, ejecuta la extracción de características y orquesta la llamada al ejecutable de Haskell. |
+| **Simulator** | **Python (pygame)** | `simulation.py` | Recibe la imagen, ejecuta la extracción de características y orquesta la llamada al ejecutable de Haskell. |
 | **Núcleo ML** | **Haskell** | `Classifier.hs`, `Main.hs` | **Clasificación Pura:** Recibe el vector de características de Python a través de la CLI, ejecuta el KNN y devuelve la predicción. |
 
 ### Diagrama de Flujo de Predicción

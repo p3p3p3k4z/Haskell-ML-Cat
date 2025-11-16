@@ -7,3 +7,6 @@ venv/
 dist-newstyle/
 
 test.py
+
+_frame_to_detect.jpg
+_frame.jpg
