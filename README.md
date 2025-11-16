@@ -19,15 +19,30 @@ Implementar un clasificador de imágenes robusto utilizando la **Programación F
 
     sudo apt-get install zenity
 
+- Carpeta Cat_Breed
+  
+  Debes teenr tus carpetas de imagenes de distintas razas de gatos y una carpeta NoCat donde pondras subcarpetas de animales
 
-### Test
+
+## Pasos para ejecutar
+
+### Histograma
+    python3 data_extractor.py
+
+##### Test (opcional)
     cabal update
     TEST_VECTOR=$(head -n 1 training_data.csv | cut -d ',' -f 2-)
     cabal run fun_cat_classifier "$TEST_VECTOR"
 
-#### Crear binario
+#### Crear ejecutable
     cabal build
     cabal install --installdir=. fun_cat_classifier
+
+### Ejecutar 
+    Modo pygame
+    python3 simulation.py
+    WebCam
+    python3 webcam.py
 
 
 ## 💡 Fundamentos Teóricos
