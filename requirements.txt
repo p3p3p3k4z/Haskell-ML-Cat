@@ -2,3 +2,5 @@ python-multipart
 opencv-python
 numpy
 pygame
+torch
+torchvision

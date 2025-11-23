@@ -1,0 +1,6 @@
+venv/
+imagebet_classes.txt
+_webcam_capture.jpg
+compilate/
+
+resnet_model.pt

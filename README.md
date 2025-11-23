@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo del Proyecto
 
-Implementar un clasificador de imágenes robusto utilizando la **Programación Funcional Pura** (Haskell) para el núcleo del algoritmo, y una interfaz web moderna (Python) para la interacción con el usuario. El objetivo final es clasificar una imagen de entrada como una raza específica de gato (e.g., Persa, Egipcio, Común) o como "No-Gato".
+Implementar un clasificador de imágenes robusto utilizando la **Programación Funcional Pura** (Haskell) para el núcleo del algoritmo, y una interfaz (Python) para la interacción con el usuario. El objetivo final es clasificar una imagen de entrada como una raza específica de gato (e.g., Persa, Egipcio, Común) o como "No-Gato".
 
 ### Requisitos
 - tener instalado el GHCup
@@ -85,11 +85,11 @@ El proyecto se divide en dos entornos que interactúan a través de la Línea de
 
 ### Diagrama de Flujo de Predicción
 
-1.  **Usuario** sube la imagen a la interfaz **Python/FastAPI**.
+1.  **Usuario** sube la imagen a la interfaz **Python/pygame/webcam**.
 2.  **Python** usa librerías de ML para extraer el vector de características de la imagen.
 3.  **Python** llama al programa compilado de Haskell (**`./fun_cat_classifier`**) a través de un *subproceso*, pasando el vector de características como argumento de **CLI**.
 4.  El ejecutable **Haskell** lee el argumento, ejecuta la clasificación **pura** (KNN) y escribe la etiqueta predicha (`Persian`, `NotCat`, etc.) en la salida estándar (`stdout`).
-5.  **Python** captura la salida (`stdout`) de Haskell y la retorna al usuario como respuesta de la API.
+5.  **Python** captura la salida (`stdout`) de Haskell y la retorna al usuario como respuesta.
 
 ## 🛠️ Plan de Construcción (Etapas)
 
