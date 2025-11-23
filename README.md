@@ -1,144 +1,161 @@
-# 🐱 Proyecto: Clasificador Funcional de Gatos
+# 🐱 Haskell ML Cat: KNN vs Deep Learning
 
-## 🎯 Objetivo del Proyecto
+Este proyecto es un **sistema de benchmarking híbrido** que compara dos paradigmas de Inteligencia Artificial aplicados a la visión por computadora:
 
-Implementar un clasificador de imágenes robusto utilizando la **Programación Funcional Pura** (Haskell) para el núcleo del algoritmo, y una interfaz (Python) para la interacción con el usuario. El objetivo final es clasificar una imagen de entrada como una raza específica de gato (e.g., Persa, Egipcio, Común) o como "No-Gato".
+1.  **Modelo Clásico (KNN):** Implementado desde cero en **Haskell Puro** utilizando algoritmos matemáticos clásicos.
+2.  **Deep Learning (CNN):** Implementado con **Hasktorch** (bindings de Haskell para PyTorch), utilizando una red neuronal ResNet-18 pre-entrenada.
 
-### Requisitos
-- tener instalado el GHCup
+Todo el sistema está orquestado por una interfaz gráfica moderna en **Python (Pygame)** que gestiona la webcam, la visualización y la comunicación entre procesos.
 
-  curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+-----
 
-- crear entorno virtual 
+## Arquitectura del Sistema
 
-    python3 -m venv venv 
-    source venv/bin/activate 
-    pip install -r requirements.txt
+El proyecto utiliza una arquitectura de **Software Híbrido** basada en comunicación por procesos (IPC) y sistema de archivos.
 
-- Explorador de archivos
+[Image of hybrid software architecture diagram]
 
-    sudo apt-get install zenity
+1.  **Frontend (Python/Pygame):**
+      * Controla la Webcam y la Interfaz Gráfica (GUI).
+      * Captura fotogramas y los guarda temporalmente.
+      * Orquesta la ejecución de los binarios de Haskell.
+2.  **Backend 1: KNN Classifier (Haskell Puro):**
+      * Recibe un vector de características extraído por Python (Histograma de Color).
+      * Calcula distancias euclidianas contra una base de datos (`training_data.csv`).
+      * Determina si la imagen es un gato y su raza mediante votación mayoritaria.
+3.  **Backend 2: Hasktorch Detector (Haskell + C++):**
+      * Recibe la ruta de la imagen.
+      * Carga un modelo `ResNet-18` serializado (`.pt`).
+      * Utiliza tensores y operaciones convolucionales (vía `libtorch` C++) para clasificar el objeto.
 
-- Carpeta Cat_Breed
-  
-  Debes teenr tus carpetas de imagenes de distintas razas de gatos y una carpeta NoCat donde pondras subcarpetas de animales
-
-
-## Pasos para ejecutar
-
-### Histograma
-    python3 data_extractor.py
-
-##### Test (opcional)
-    cabal update
-    TEST_VECTOR=$(head -n 1 training_data.csv | cut -d ',' -f 2-)
-    cabal run fun_cat_classifier "$TEST_VECTOR"
-
-#### Crear ejecutable
-    cabal build
-    cabal install --installdir=. fun_cat_classifier
-
-### Ejecutar 
-    Modo pygame
-    python3 simulation.py
-    WebCam
-    python3 webcam.py
-
+-----
 
 ## 💡 Fundamentos Teóricos
 
-### 1. Principios de Programación Funcional (Haskell)
+### 1\. K-Nearest Neighbors (KNN)
 
-El proyecto se centra en demostrar la capacidad de Haskell para construir algoritmos de ML complejos de forma **declarativa y verificable**.
+El modelo clásico implementado es un algoritmo de **Aprendizaje Supervisado**.
 
-* **Núcleo de Funciones Puras:** Las funciones de **Distancia Euclidiana** y el **Algoritmo KNN** (incluida la votación multi-clase) serán estrictamente puras.
-* **Modelado con ADTs:** Se utilizarán **Tipos de Datos Algebraicos (ADTs)** para definir claramente el dominio:
-    * `data Label = Persian | Egyptian | Common | NotCat deriving (Show, Eq)`
-    * `data LabeledPoint = LabeledPoint { ... }`
-* **Composición Funcional:** La lógica de clasificación se construirá mediante la composición de funciones (`.`) y el uso intensivo de **Funciones de Orden Superior** (`map`, `filter`, `foldl`, `sortBy`).
+  * **Aprendizaje Supervisado:** El modelo aprende de un conjunto de datos previamente etiquetado (el archivo `training_data.csv`). Cada histograma de color (entrada) está asociado explícitamente a una raza de gato (salida esperada).
+  * **Aprendizaje Perezoso (Lazy Learning):** A diferencia de las redes neuronales que "entrenan" y generalizan reglas, el KNN simplemente **memoriza** los datos de entrenamiento. No construye un modelo interno hasta que se le hace una pregunta.
+      * *Consecuencia:* El "entrenamiento" es instantáneo (solo cargar datos), pero la predicción es costosa computacionalmente, ya que debe comparar la nueva imagen contra *todas* las imágenes guardadas cada vez.
 
-### 2. Algoritmo KNN Multi-Clase
+### 2\. Haskell y el Paradigma Funcional
 
-* **Base:** El algoritmo **K-Nearest Neighbors** se mantiene, clasificando una nueva imagen basándose en la mayoría de sus $K$ vecinos más cercanos en el espacio de características.
-* **Votación Multi-Clase:** La función `majorityVote` se actualizará para manejar cuatro o más etiquetas, contando las ocurrencias de cada raza y de "NotCat" para determinar la clase ganadora.
+El uso de Haskell fuerza la aplicación estricta de principios funcionales, garantizando un código robusto y matemáticamente verificable.
 
-2. Algoritmo KNN Multi-Clase
+| Concepto | Explicación Teórica | Aplicación en el Proyecto |
+| :--- | :--- | :--- |
+| **Funciones Puras** | Una función siempre devuelve el mismo resultado para las mismas entradas y **no tiene efectos secundarios** (no modifica variables globales ni realiza E/S oculta). | El algoritmo **KNN completo** (cálculo de distancia euclidiana, votación, clasificación) reside en `Classifier.hs` como un conjunto de funciones puras. |
+| **Inmutabilidad** | Una vez creada una estructura de datos, no puede modificarse. Para "cambiarla", se crea una copia nueva con los cambios. | El **conjunto de entrenamiento** (`[LabeledPoint]`) es inmutable. Esto elimina errores de concurrencia: el modelo nunca puede ser corrompido por una escritura accidental. |
+| **Tipos de Datos Algebraicos (ADTs)** | Estructuras de datos compuestas que expresan la forma exacta de los datos. Incluyen Tipos Producto (AND) y Tipos Suma (OR). | Usamos `data Label = Persian | Egyptian | ...` para modelar las clases de forma estricta, impidiendo estados inválidos. |
+| **Evaluación Perezosa (Lazy Evaluation)** | Haskell no ejecuta una operación hasta que su resultado es estrictamente necesario. | Permite definir estructuras infinitas o muy grandes. En `Main.hs`, la lista de 1000 etiquetas de ImageNet no se carga en RAM hasta que se necesita imprimir un resultado específico. |
+| **Mónada IO** | Un mecanismo para aislar los efectos secundarios (impuros) del resto del código puro. | En `Main.hs`, toda interacción con el sistema de archivos o la consola está confinada dentro del bloque `main :: IO ()`, manteniendo el resto del sistema puro. |
 
-    Base: El algoritmo K-Nearest Neighbors (KNN) clasifica una nueva instancia (imagen) basándose en las clases de sus K vecinos más cercanos en el espacio de características.
+-----
 
-    Teoría Clave: La Distancia Euclidiana es la métrica utilizada para cuantificar la "similitud" entre el vector de características de la imagen a clasificar (q) y cada vector de características de las imágenes de entrenamiento (p).
+## 🛠️ Guía de Instalación y Compilación
 
-    La fórmula, para dos puntos p y q en un espacio de n dimensiones (características), se define como:
-    d(p,q)=i=1∑n​(pi​−qi​)2​
+### Requisitos
 
-    Esta métrica se implementará como una función pura en Haskell.
+  * **Linux/macOS** (Recomendado por dependencias de C++).
+  * **GHC & Cabal:** (Vía GHCup).
+  * **Python 3.x**
+  * **Librerías de Sistema:** `zenity` (para diálogos de archivo).
 
-## ⚙️ Arquitectura Híbrida y Comunicación
+### Paso 1: Compilar el Entorno Haskell (Hasktorch)
 
-El proyecto se divide en dos entornos que interactúan a través de la Línea de Comandos (CLI) para mantener el núcleo Haskell lo más puro posible.
+Este es el paso más crítico. Debemos compilar el "cerebro" de Deep Learning.
+Nota: revisar docs/Hasktorch.md y clonar el repo de Hasktorch
 
-| Componente | Lenguaje | Módulos Clave | Tarea Principal |
-| :--- | :--- | :--- | :--- |
-| **I/O, Extracción** | **Python** | `data_extractor.py` | Carga, Pre-procesamiento y Extracción de **Vectores de Características** (e.g., Histogramas de Color). |
-| **Simulator** | **Python (pygame)** | `simulation.py` | Recibe la imagen, ejecuta la extracción de características y orquesta la llamada al ejecutable de Haskell. |
-| **Núcleo ML** | **Haskell** | `Classifier.hs`, `Main.hs` | **Clasificación Pura:** Recibe el vector de características de Python a través de la CLI, ejecuta el KNN y devuelve la predicción. |
+```bash
+cd load-torchscript
+# Descargar modelo y configurar entorno
+./setup-cabal.sh
+python3 gen_resnet.py
+# Compilar el ejecutable (esto puede tardar)
+cabal build load-torchscript
+# Copiar el binario a la carpeta local para acceso rápido
+cabal install load-torchscript --install-method=copy --installdir=.
+```
 
-### Diagrama de Flujo de Predicción
+### Paso 2: Compilar el Clasificador KNN
 
-1.  **Usuario** sube la imagen a la interfaz **Python/pygame/webcam**.
-2.  **Python** usa librerías de ML para extraer el vector de características de la imagen.
-3.  **Python** llama al programa compilado de Haskell (**`./fun_cat_classifier`**) a través de un *subproceso*, pasando el vector de características como argumento de **CLI**.
-4.  El ejecutable **Haskell** lee el argumento, ejecuta la clasificación **pura** (KNN) y escribe la etiqueta predicha (`Persian`, `NotCat`, etc.) en la salida estándar (`stdout`).
-5.  **Python** captura la salida (`stdout`) de Haskell y la retorna al usuario como respuesta.
+Es necesario compilar el código fuente de Haskell puro para generar el binario `fun_cat_classifier`.
+Nota: Revisar docs/KNN.md
 
-## 🛠️ Plan de Construcción (Etapas)
+```bash
+# Desde la raíz del proyecto
+cabal build 
+# Instalar el binario en la raíz
+cabal install --installdir=. fun_cat_classifier
+```
 
-### Fase 1: Recolección y Preparación de Datos (Python)
+> **Nota:** Asegúrate de tener el archivo `training_data.csv` generado. Si no, ejecuta `python3 data_extractor.py`.
 
-* **Datos:** Recolectar un conjunto de imágenes etiquetadas con al menos tres clases de gatos y una clase `NotCat`.
-* **Extracción:** Implementar `data_extractor.py` para leer las imágenes, extraer los **vectores de características** (normalizados) y generar el archivo **`training_data.csv`** con la etiqueta y sus correspondientes valores.
+### Paso 3: Configurar Python
 
-### Fase 2: Implementación del Núcleo Funcional (Haskell)
+Instalar las dependencias para la interfaz gráfica y visión.
 
-1.  **Tipos:** Definir las estructuras de datos, incluyendo el `data Label` multi-clase.
-2.  **Lógica:** Implementar las funciones **puras**:
-    * `euclideanDistance :: FeatureVector -> FeatureVector -> Double`
-    * `majorityVote :: [Label] -> Label` (para manejar la votación multi-clase).
-    * `kNearestNeighbors :: Int -> [LabeledPoint] -> FeatureVector -> Label`
-3.  **CLI I/O:** Implementar el `main` de Haskell para que:
-    * Cargue el `training_data.csv` (una vez) al inicio.
-    * Parseé el vector de características de consulta desde los argumentos de la línea de comandos.
-    * Imprima el resultado de la función `kNearestNeighbors` en `stdout`.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-### Fase 3: Interfaz Pygame
+*(Contenido de requirements.txt: `pygame`, `opencv-python`, `numpy`, `torch`, `torchvision`)*
 
-2.  **Orquestación:** Dentro del *endpoint* `/predict`:
-    * Llamar a la función de extracción de características.
-    * Utilizar `subprocess` para ejecutar el binario de Haskell con las características como argumento.
-    * Capturar la salida (`stdout`) de Haskell (que será la etiqueta predicha).
-    * Devolver la predicción al usuario.
+-----
 
-Este enfoque garantiza que se cumplen todos los requisitos: Haskell para el núcleo funcional, clasificación multi-clase, y una interfaz moderna con Python.
+## Ejecución
 
-#### Otras tecnologias a explorar
+El proyecto cuenta con un **Hub Central** que unifica todo.
 
-CNN 
-HaskellTorch
-JuicyPixels
+```bash
+python3 app.py
+```
 
-#### Posibles formas de usar
-Haskell
-Prolog
-CAML
-Orita
+### Uso de la Interfaz:
 
-Esto puede ser usado para:
-- reglas (factor de peso, redes neuronales)
-- inferencias
-- deduccion
-- creacion
-- restricciones
-- ia (old-fashion)
-- Algoritmo a-B
-- algoritmos de grafos
-- algoritmos de ordenamientos
+1.  **Selecciona el Modelo:**
+      * **KNN Clásico:** Verás cómo el modelo intenta clasificar razas de gatos basándose en colores.
+      * **Deep Learning:** Verás el poder de ResNet detectando cualquier objeto (no solo gatos).
+2.  **Selecciona la Fuente:**
+      * **Archivo:** Abre un explorador para probar con imágenes descargadas.
+      * **Webcam:** Abre la cámara en tiempo real.
+3.  **En modo Webcam:**
+      * Apunta a un objeto.
+      * Presiona **[ESPACIO]** para congelar y analizar.
+      * Observa la comparativa de tiempo y resultado.
+
+-----
+
+## Retos de Desarrollo (Bitácora)
+
+1.  **Infierno de Enlaces (Linking Hell):** Lograr que Haskell compilara contra las librerías dinámicas de C++ (`libtorch`) requirió una configuración precisa de `cabal.project` y `LD_LIBRARY_PATH`.
+2.  **Interoperabilidad de Procesos:** Python fallaba al llamar al binario de Haskell porque el entorno de la shell no se heredaba. Se solucionó implementando llamadas con `subprocess.run(..., shell=True)`, replicando el comportamiento de una terminal real.
+3.  **Sincronización:** Se implementó un sistema de archivos temporales y semáforos implícitos para evitar condiciones de carrera entre la captura de la webcam (Python) y la lectura de la imagen (Haskell).
+
+-----
+
+## 📂 Estructura del Proyecto
+
+```text
+Haskell-ML-Cat/
+├── app.py                  # Hub Principal (Interfaz Pygame)
+├── fun_cat_classifier      # Ejecutable Binario KNN (Haskell Puro)
+├── training_data.csv       # Base de datos de conocimiento KNN
+│
+├── load-torchscript/       # Módulo de Deep Learning
+│   ├── load-torchscript    # Ejecutable Binario CNN (Haskell+C++)
+│   ├── resnet_model.pt     # Modelo neuronal serializado
+│   └── Main.hs             # Código fuente Haskell (Inferencia)
+│
+├── src/                    # Código fuente KNN
+│   ├── Classifier.hs    # Lógica pura (Distancia Euclidiana)
+│   └── Main.hs   # Punto de entrada KNN
+│
+└── Cat_Breed/              # Dataset de imágenes 
+```
+
+- Si deseas puedes descargarla aqui: [Gatos](https://drive.google.com/drive/folders/1MeLRuxliR174CcY40eb60t0jsVF0afZ7?usp=sharing) 
