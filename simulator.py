@@ -186,7 +186,7 @@ class CatSimulator:
             self.animation_timer = pygame.time.get_ticks()
             g_prediction_result = None
             
-            # --- ¡NUEVO! Reproducir sonido de análisis en bucle ---
+            # --- Reproducir sonido de análisis en bucle ---
             if self.sound_analysis:
                 self.sound_analysis.play(loops=-1)
                 
