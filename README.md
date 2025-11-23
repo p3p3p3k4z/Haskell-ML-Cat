@@ -66,7 +66,7 @@ El uso de Haskell fuerza la aplicación estricta de principios funcionales, gara
 ### Paso 1: Compilar el Entorno Haskell (Hasktorch)
 
 Este es el paso más crítico. Debemos compilar el "cerebro" de Deep Learning.
-Nota: revisar docs/Hasktorch.md y clonar el repo de Hasktorch
+>Nota: revisar docs/Hasktorch.md y clonar el repo de Hasktorch
 
 ```bash
 cd load-torchscript
@@ -82,7 +82,7 @@ cabal install load-torchscript --install-method=copy --installdir=.
 ### Paso 2: Compilar el Clasificador KNN
 
 Es necesario compilar el código fuente de Haskell puro para generar el binario `fun_cat_classifier`.
-Nota: Revisar docs/KNN.md
+>Nota: Revisar docs/KNN.md
 
 ```bash
 # Desde la raíz del proyecto
@@ -158,4 +158,5 @@ Haskell-ML-Cat/
 └── Cat_Breed/              # Dataset de imágenes 
 ```
 
-- Si deseas puedes descargarla aqui: [Gatos](https://drive.google.com/drive/folders/1MeLRuxliR174CcY40eb60t0jsVF0afZ7?usp=sharing) 
+- Puedes contruir tu propia carpeta Cat_Breed/ dentro debe de tener imagenes dividas en carpetas de razas de gatos y una carpeta NoCat/ conteniendo por ejemplo carpetas de imagenes de animales.
+- Si deseas puedes descargarla mi carpeta aqui: [Gatos](https://drive.google.com/drive/folders/1MeLRuxliR174CcY40eb60t0jsVF0afZ7?usp=sharing) 

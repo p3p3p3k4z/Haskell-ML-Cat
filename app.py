@@ -309,8 +309,10 @@ def update_analysis(screen, fonts):
     draw_text(screen, "PROCESANDO...", SCREEN_W//2, SCREEN_H//2 - 200, fonts['big'], (255, 255, 50))
     
     if state["anim_images"]:
-        idx = (pygame.time.get_ticks() // 300) % len(state["anim_images"])
-        path = state["anim_images"][idx]
+        semilla_tiempo = pygame.time.get_ticks() // 200 #Tiempo de cada img
+        random.seed(semilla_tiempo) 
+
+        path = random.choice(state["anim_images"])#Selecciona aleatoriamente la img
         try:
             img = pygame.image.load(path)
             img = pygame.transform.scale(img, (300, 225))

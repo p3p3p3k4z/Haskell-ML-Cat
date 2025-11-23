@@ -1,0 +1,181 @@
+\documentclass[12pt, letterpaper]{article}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb} % Para fórmulas matemáticas
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{listings} % Para código Haskell
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% --- Configuración de página ---
+\geometry{top=3cm, bottom=3cm, left=3cm, right=3cm}
+
+% --- Estilo de código Haskell ---
+\definecolor{haskellblue}{rgb}{0,0,1}
+\definecolor{haskellgreen}{rgb}{0,0.5,0}
+\definecolor{haskellgray}{rgb}{0.5,0.5,0.5}
+\definecolor{haskellpurple}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{haskellStyle}{
+    language=Haskell,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{haskellblue}\bfseries,
+    stringstyle=\color{haskellgreen},
+    commentstyle=\color{haskellgray}\itshape,
+    numberstyle=\tiny\color{haskellgray},
+    numbers=left,
+    stepnumber=1,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=2
+}
+
+% --- Datos del Documento ---
+\title{
+    \textbf{Aplicación del Paradigma Funcional en Inteligencia Artificial}\\
+    \large Comparativa: K-Nearest Neighbors (Puro) vs. Deep Learning (Hasktorch)
+}
+\author{
+    \textbf{Tu Nombre Completo} \\
+    Materia: Programación Funcional \\
+    \textit{Nombre de tu Universidad}
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Este informe presenta el desarrollo y análisis de dos sistemas de clasificación de imágenes implementados en \textbf{Haskell}. Se explora cómo los principios fundamentales de la programación funcional —como la inmutabilidad, la pureza referencial, la evaluación perezosa y el manejo de efectos mediante Mónadas— se aplican en el dominio de la Inteligencia Artificial. Se compara una implementación manual y pura del algoritmo \textit{K-Nearest Neighbors} (KNN) frente a una implementación moderna utilizando \textit{Hasktorch} (bindings para PyTorch), analizando las ventajas teóricas y prácticas del paradigma funcional en ambos casos.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ==========================================
+% SECCIÓN 1: MARCO TEÓRICO
+% ==========================================
+\section{Fundamentos Teóricos de Machine Learning}
+
+\subsection{Aprendizaje Supervisado y Basado en Instancias}
+El núcleo del proyecto se basa en el \textbf{Aprendizaje Supervisado}, donde el algoritmo induce una función a partir de pares etiquetados de entrada-salida $(x, y)$.
+
+Para el clasificador KNN implementado, utilizamos un enfoque \textbf{No Paramétrico} y \textbf{Basado en Instancias} (Lazy Learning). A diferencia de los modelos que generalizan una función matemática durante el entrenamiento (Eager Learning), nuestro modelo KNN pospone el procesamiento hasta el momento de la consulta.
+\begin{itemize}
+    \item \textbf{Entrenamiento:} $O(1)$. Simplemente almacena los vectores de características.
+    \item \textbf{Inferencia:} $O(N)$. Calcula la distancia entre la nueva instancia y todas las almacenadas.
+\end{itemize}
+
+\subsection{Métrica de Distancia}
+La base matemática del clasificador es la \textbf{Distancia Euclidiana}, definida formalmente para dos vectores $p$ y $q$ en un espacio $n$-dimensional como:
+\begin{equation}
+    d(p,q) = \sqrt{\sum_{i=1}^{n} (q_i - p_i)^2}
+\end{equation}
+Esta fórmula se traduce directamente a una composición de funciones puras en Haskell (resta, cuadrado, suma, raíz cuadrada).
+
+\subsection{Deep Learning y Convoluciones}
+En contraste, la implementación con \textbf{Hasktorch} utiliza una Red Neuronal Convolucional (CNN) basada en la arquitectura ResNet-18. Este modelo realiza transformaciones no lineales sucesivas sobre tensores (matrices $n$-dimensionales) para extraer características jerárquicas (bordes $\rightarrow$ texturas $\rightarrow$ objetos), superando la limitación de "solo color" del KNN.
+
+% ==========================================
+% SECCIÓN 2: IMPLEMENTACIÓN FUNCIONAL (HASKELL)
+% ==========================================
+\section{Implementación y Paradigma Funcional}
+
+El uso de Haskell no es meramente instrumental, sino que garantiza propiedades de corrección que son difíciles de obtener en lenguajes imperativos.
+
+\subsection{Pureza Referencial y Funciones Matemáticas}
+En el módulo KNN, la lógica de negocio está completamente aislada de los efectos secundarios. La función de distancia no depende de estados globales ni variables mutables.
+
+\begin{lstlisting}[style=haskellStyle, caption=Implementación Pura de la Distancia Euclidiana]
+-- Función pura: Mismo input siempre genera mismo output
+euclideanDistance :: FeatureVector -> FeatureVector -> Double
+euclideanDistance p q = sqrt $ sum $ zipWith (\x y -> (x - y)^2) p q
+\end{lstlisting}
+
+El uso de \texttt{zipWith} y \texttt{fold} (implícito en \texttt{sum}) demuestra el poder de las funciones de orden superior para procesar listas de manera declarativa, evitando los bucles \texttt{for} imperativos propensos a errores de índice.
+
+\subsection{Tipos de Datos Algebraicos (ADTs)}
+Para modelar el dominio del problema, se utilizaron ADTs que impiden la representación de estados inválidos.
+
+\begin{lstlisting}[style=haskellStyle, caption=Modelado de Datos con ADTs]
+-- Tipo Suma: Enumera exhaustivamente las clases posibles
+type Label = String -- Simplificado para flexibilidad
+
+-- Tipo Producto: Agrupa la etiqueta con sus datos matemáticos
+data LabeledPoint = LabeledPoint {
+    lpLabel    :: Label,
+    lpFeatures :: [Double]
+} deriving (Show, Eq)
+\end{lstlisting}
+
+\subsection{Aislamiento de Efectos (La Mónada IO)}
+Uno de los mayores desafíos en IA es manejar la entrada/salida (leer imágenes, cargar modelos) sin "contaminar" la lógica pura. Haskell resuelve esto mediante la **Mónada IO**.
+
+En nuestra implementación, el sistema de tipos distingue estrictamente entre:
+\begin{itemize}
+    \item \texttt{[Double]}: Un vector de datos puro (seguro, inmutable).
+    \item \texttt{IO [Double]}: Una receta para obtener un vector del mundo exterior (inseguro, volátil).
+\end{itemize}
+
+El código fuerza a que toda interacción con el hardware (lectura de archivos, argumentos de consola) ocurra exclusivamente en el punto de entrada \texttt{main}, pasando posteriormente datos puros a las funciones de clasificación.
+
+\subsection{Evaluación Perezosa (Lazy Evaluation)}
+Haskell utiliza una estrategia de evaluación "call-by-need". Esto fue crucial para la eficiencia del manejo de las etiquetas en el modelo de Deep Learning.
+
+\begin{lstlisting}[style=haskellStyle, caption=Lista de Etiquetas (Evaluación Perezosa)]
+-- Esta lista gigante no ocupa memoria al iniciar el programa
+labels :: [String]
+labels = [ "tench", "goldfish", ... (998 elementos mas) ... ]
+
+-- Solo se evalúa el elemento específico necesario para la impresión
+print $ labels !! predictionIndex
+\end{lstlisting}
+
+Gracias a la pereza, el programa no desperdicia ciclos de CPU ni memoria construyendo la lista completa de 1000 categorías de ImageNet si solo necesita acceder a una de ellas.
+
+\subsection{Composición de Funciones y Pipelines}
+En el pre-procesamiento de imágenes con \textit{JuicyPixels}, evitamos las variables temporales mutables típicas de C++ o Python. En su lugar, construimos un \textit{pipeline} de transformación de datos usando el operador de composición.
+
+\begin{lstlisting}[style=haskellStyle, caption=Pipeline de Transformación de Imagen]
+-- Estilo Declarativo: Se lee de derecha a izquierda
+let imgFinal = toType Float 
+             $ hwc2chw 
+             $ normalize 
+             $ divScalar 255.0 
+             $ fromDynImage imgRaw
+\end{lstlisting}
+
+Este enfoque hace que el flujo de datos sea explícito y verificable: la salida de una función es matemáticamente la entrada de la siguiente.
+
+% ==========================================
+% SECCIÓN 3: RESULTADOS COMPARATIVOS
+% ==========================================
+\section{Análisis de Resultados}
+
+Se compararon ambos enfoques (KNN Puro vs Hasktorch) bajo las mismas condiciones de hardware.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Criterio} & \textbf{Modelo KNN (Haskell Puro)} & \textbf{Modelo CNN (Hasktorch)} \\ \midrule
+\textbf{Paradigma} & Funcional (Listas, Map, Fold) & Funcional (Tensores, FFI) \\
+\textbf{Complejidad Temporal} & $O(N)$ por consulta (Lento) & $O(1)$ por consulta (Rápido) \\
+\textbf{Abstracción} & Baja (Histogramas de color) & Alta (Semántica de objetos) \\
+\textbf{Gestión de Memoria} & Inmutable (Listas enlazadas) & Mutable en C++ (gestión automática) \\
+\textbf{Precisión} & Baja (Sensible a iluminación) & Muy Alta (Estado del arte) \\ \bottomrule
+\end{tabular}
+\caption{Comparativa Técnica de Implementaciones}
+\end{table}
+
+\section{Conclusión}
+Este proyecto demuestra que Haskell es un lenguaje viable y poderoso para la Inteligencia Artificial. Si bien el ecosistema de Deep Learning (\textit{Hasktorch}) requiere configuraciones complejas, el código resultante es conciso, seguro y expresivo.
+
+La aplicación de conceptos como la **Inmutabilidad** garantiza que los modelos de datos no sufran corrupción por efectos secundarios, un problema común en implementaciones imperativas concurrentes. Asimismo, el **Sistema de Tipos** actuó como una barrera de seguridad efectiva, previniendo errores de dimensión en los tensores y errores lógicos durante la fase de compilación, mucho antes de la ejecución.
+
+\end{document}
