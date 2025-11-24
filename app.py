@@ -373,7 +373,7 @@ def main():
     pygame.font.init() 
     
     state["display_surf"] = pygame.display.set_mode((SCREEN_W, SCREEN_H))
-    pygame.display.set_caption("Haskell AI Benchmark")
+    pygame.display.set_caption("Haskell ML Cat")
     load_assets()
     
     fonts = {

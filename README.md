@@ -7,6 +7,8 @@ Este proyecto es un **sistema de benchmarking híbrido** que compara dos paradig
 
 Todo el sistema está orquestado por una interfaz gráfica moderna en **Python (Pygame)** que gestiona la webcam, la visualización y la comunicación entre procesos.
 
+![inicio](preview/inicio.png)
+
 -----
 
 ## Arquitectura del Sistema
@@ -27,6 +29,8 @@ El proyecto utiliza una arquitectura de **Software Híbrido** basada en comunica
       * Recibe la ruta de la imagen.
       * Carga un modelo `ResNet-18` serializado (`.pt`).
       * Utiliza tensores y operaciones convolucionales (vía `libtorch` C++) para clasificar el objeto.
+
+![webcam](preview/webcam.png)
 
 -----
 
@@ -127,6 +131,8 @@ python3 app.py
       * Apunta a un objeto.
       * Presiona **[ESPACIO]** para congelar y analizar.
       * Observa la comparativa de tiempo y resultado.
+
+![analisis](preview/analisis.png)
 
 -----
 
