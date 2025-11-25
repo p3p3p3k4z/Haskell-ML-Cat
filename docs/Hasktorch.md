@@ -123,7 +123,7 @@ Desde la carpeta `examples/load-torchscript/`:
     pip install torch torchvision opencv-python
     ```
 3.  **Descargar el modelo:**
-    Ejecutamos el script que baja el modelo ResNet-18 y lo convierte a formato TorchScript.
+    Ejecutamos el script que baja el modelo ResNet-18 y lo convierte a formato TorchScript. Red Neuronal Convolucional (CNN)
     ```bash
     python3 gen_resnet.py
     ```

@@ -13,17 +13,17 @@ import Data.List (sortBy, groupBy, sort)
 import Data.Ord (comparing)
 
 -- 1. DEFINICIONES DE TIPOS (ADTs)
---
--- ------------------------------------------------
 
--- Un 'String' es más flexible para las 15+ razas de tu CSV
+-- Un 'String' es más flexible para las 15+ razas para CSV
+-- data Label = Persian | Egyptian | Common | NotCat deriving (Show, Eq)
 type Label = String
 
--- Un FeatureVector es simplemente una lista de números (Dobles)
+-- FeatureVector es simplemente una lista de números
+-- Representando el histograma, espacio
 type FeatureVector = [Double]
 
--- Un LabeledPoint es el "Tipo Producto" que une una Etiqueta
--- con su Vector de Características.
+-- LabeledPoint es el "Tipo Producto" que une una Etiqueta
+-- con su Vector de Características (ejemplos de entrenamiento)
 data LabeledPoint = LabeledPoint {
     lpLabel    :: Label,
     lpFeatures :: FeatureVector
@@ -31,20 +31,20 @@ data LabeledPoint = LabeledPoint {
 
 
 -- 2. FUNCIONES PURAS
---
--- ------------------------------------------------
-
 {- |
 Calcula la Distancia Euclidiana entre dos vectores (listas de Dobles).
 Esta es la fórmula implementada: d(p,q) = sqrt( sum( (pi - qi)^2 ) )
-
+Realmente mide que tan similares son las imagenes en color
 -}
 euclideanDistance :: FeatureVector -> FeatureVector -> Double
+-- Restar histograma (p1-q1..)
 euclideanDistance p q = sqrt $ sum $ zipWith (\x y -> (x - y)^2) p q
 
 {- |
 Encuentra la etiqueta más común en una lista de etiquetas.
 Esta es la función de "votación multi-clase".
+Si los 5 vecinos son ["Persa", "Persa", "Siamés", "Persa", "Siamés"],
+esta función debe devolver "Persa" porque tiene 3 votos.
 -}
 majorityVote :: [Label] -> Label
 majorityVote labels =
@@ -56,28 +56,37 @@ majorityVote labels =
         -- sortBy 'comparing length' ordena de menor a mayor
         -- (reverse) lo invierte para tener el más largo primero
         longestGroupFirst = reverse $ sortBy (comparing length) groupedLabels
-    -- 4. Toma el primer elemento del grupo más largo (ej. "A")
+    -- 4. Toma el primer elemento del grupo más largo (ej. "A") y extrae la etiqueta
     in head $ head longestGroupFirst
 
 {- |
 Función principal del clasificador KNN.
 Encuentra la etiqueta predicha para un nuevo vector de características.
-
+Aqui es donde estra el aprendizaje supervisado, pero lo autonombre aprendijaze perezoso
+Ya que en realidad no entrena un modelo, memoriza los datos y busca en el momento
 -}
 kNearestNeighbors :: Int -> [LabeledPoint] -> FeatureVector -> Label
 kNearestNeighbors k trainingData query =
     let
-        -- 1. Calcula la distancia desde 'query' a CADA punto en 'trainingData'
+        -- Medir Similitud (Fuerza Bruta)
+        -- Calculamos la distancia entre la imagen nueva ('query') 
+        -- y TODAS las imágenes de la base de datos.
+        -- Resultado: Una lista de pares [(Distancia, "Raza"), ...]
         distances = map (\point -> (euclideanDistance (lpFeatures point) query, lpLabel point)) trainingData
         
-        -- 2. Ordena la lista por la distancia (el primer elemento de la tupla)
+        -- Ranking
+        -- Ordenamos la lista de menor a mayor distancia.
+        -- Los que están arriba son los "Vecinos Más Cercanos".
         sortedDistances = sortBy (comparing fst) distances
         
-        -- 3. Toma las primeras 'k' tuplas (los 'k' vecinos más cercanos)
+        -- Toma las primeras 'k' tuplas (los 'k' vecinos más cercanos)
         kNearest = take k sortedDistances
         
-        -- 4. Extrae solo las etiquetas de esos 'k' vecinos
+        -- Extrae solo las etiquetas de esos 'k' vecinos
+        -- Descartamos las distancias numéricas, solo nos importan las etiquetas.
+        -- Ej: [(0.1, "Persa"), (0.2, "Siamés")] -> ["Persa", "Siamés"]
         kNearestLabels = map snd kNearest
     in
-        -- 5. Llama a 'majorityVote' para encontrar la etiqueta ganadora
+        -- Llama a 'majorityVote' para encontrar la etiqueta ganadora
+        -- Contamos los votos para ver quién gana.
         majorityVote kNearestLabels

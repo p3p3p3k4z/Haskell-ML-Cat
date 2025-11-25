@@ -14,11 +14,23 @@ import Torch.NN
 import Torch.Script
 import Torch.Vision
 
+{-
+Tensor:estructuras de datos multidimensionales (escaladodo,vecotres matrices)
+-- Primero caja de numeros (yo ouse cubo de numeros) ancho alto colores
+-- Se trnasformo a 4D para que la red neuronal lo procesara
+-- Operaciones de normalizacion, restas y div (en lugar de pixel por pixel)
+-}
+
+-- Normalización estadística: (x - media) / desviación_estandar
+-- Esto es necesario porque la red ResNet fue entrenada con imágenes que tenían
+-- esta distribución específica las caracteristicas de la imagene
+
 normalize input = (input - mean) / std
   where
     mean = asTensor [0.485, 0.456, 0.406]
     std = asTensor [0.229, 0.224, 0.225]
 
+-- funcion inversa
 deNormalize input = clamp 0 1 $ (input * std) + mean
   where
     mean = asTensor [0.485, 0.456, 0.406]
@@ -27,30 +39,31 @@ deNormalize input = clamp 0 1 $ (input * std) + mean
 main :: IO ()
 main = do
   let opt = \case
-        [] -> ["resnet_model.pt", "elephant.jpg"]
+        [] -> ["resnet_model.pt", "elephant.jpg"] --Red Neuronal Convolucional (CNN) cerebro congelado
         a@[model', input'] -> a
         _ -> error $ "Usage: load-torchscript model-file image-file"
   [modelfile, inputfile] <- opt <$> getArgs
-  model <- loadScript WithoutRequiredGrad modelfile
+  model <- loadScript WithoutRequiredGrad modelfile --cargar modelo
 
-  mimg <- readImageAsRGB8WithScaling inputfile 256 256 True
+  mimg <- readImageAsRGB8WithScaling inputfile 256 256 True --cargar image
   case mimg of
     Left err -> print err
     Right (img_, _) -> do
-      let img' = centerCrop 224 224 img_
+      let img' = centerCrop 224 224 img_ -- escalado de la imagen
+          -- convierte a tensor y normalizacion
           img'' = toType Float $ hwc2chw $ normalize $ divScalar (255.0 :: Float) $ toType Float $ fromDynImage $ I.ImageRGB8 img'
-      case (forward model [IVTensor img'']) of
+      case (forward model [IVTensor img'']) of --pensamiento
         IVTensor v'' -> do
           let (scores', idxs') = topK 5 (Dim 1) True True $ softmax (Dim 1) v''
-              scores = asValue scores' :: [[Float]]
+              scores = asValue scores' :: [[Float]] --tensores a listas
               idxs = asValue idxs' :: [[Int]]
           print "--labels--"
-          print $ map (labels !!) $ idxs !! 0
+          print $ map (labels !!) $ idxs !! 0 --indices para las etiquetas
           print "--scores--"
           print scores'
         _ -> print "Return value is not tensor."
 
-labels :: [String]
+labels :: [String] --evaluacion perezosa
 labels =
   [ "tench",
     "goldfish",

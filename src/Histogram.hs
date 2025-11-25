@@ -27,12 +27,13 @@ baseDataDir :: FilePath
 baseDataDir = "Cat_Breed"
 
 -- Función para calcular histograma de color 3D
+-- Preparar los datos
 calculateColorHistogram :: Image PixelRGB8 -> [Double]
 calculateColorHistogram img =
     let width = imageWidth img
         height = imageHeight img
         totalPixels = width * height
-        
+        -- De matriz de pixeles a vectores de caracteristicas
         -- Inicializar histograma 3D (8x8x8 = 512 bins)
         emptyHistogram = VBoxed.replicate (binsPerChannel * binsPerChannel * binsPerChannel) 0.0
         
@@ -67,7 +68,7 @@ calculateColorHistogram img =
         
     in VBoxed.toList normalizedHist
 
--- Versión alternativa usando imageData (más eficiente)
+-- Versión alternativa usando imageData 
 calculateColorHistogramEfficient :: Image PixelRGB8 -> [Double]
 calculateColorHistogramEfficient img =
     let width = imageWidth img
@@ -205,12 +206,11 @@ isSuffixOf :: String -> String -> Bool
 isSuffixOf suffix str = 
     suffix == drop (length str - length suffix) str
 
--- Función auxiliar foldl' (si no está disponible)
+-- Función auxiliar foldl
 foldl' :: (b -> a -> b) -> b -> [a] -> b
 foldl' f z [] = z
 foldl' f z (x:xs) = let z' = f z x in z' `seq` foldl' f z' xs
 
--- Main
 main :: IO ()
 main = do
     putStrLn "--- Iniciando Extractor de Características con Histogramas ---"
