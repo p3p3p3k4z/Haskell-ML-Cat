@@ -32,7 +32,6 @@ parseQuery queryString = map read (splitOn "," queryString)
 
 -- 2. LA FUNCIÓN PRINCIPAL (El mundo "Impuro" de IO)
 -- Esto porque cambiara de estado
--- ------------------------------------------------
 
 main :: IO ()
 main = do

@@ -7,73 +7,61 @@
 module Main where
 
 import qualified Codec.Picture as I
-import Control.Monad (mapM_) -- Necesario para procesar la lista
+import Control.Monad (foldM)
 import System.Environment (getArgs)
 import Torch hiding (load)
 import Torch.NN
 import Torch.Script
 import Torch.Vision
 
--- Definen cómo "ve" la red neuronal (Normalización de Tensores).
+{-
+Tensor:estructuras de datos multidimensionales (escaladodo,vecotres matrices)
+-- Primero caja de numeros (yo ouse cubo de numeros) ancho alto colores
+-- Se trnasformo a 4D para que la red neuronal lo procesara
+-- Operaciones de normalizacion, restas y div (en lugar de pixel por pixel)
+-}
+
+-- Normalización estadística: (x - media) / desviación_estandar
+-- Esto es necesario porque la red ResNet fue entrenada con imágenes que tenían
+-- esta distribución específica las caracteristicas de la imagene
+
 normalize input = (input - mean) / std
   where
     mean = asTensor [0.485, 0.456, 0.406]
     std = asTensor [0.229, 0.224, 0.225]
 
+-- funcion inversa
 deNormalize input = clamp 0 1 $ (input * std) + mean
   where
     mean = asTensor [0.485, 0.456, 0.406]
     std = asTensor [0.229, 0.224, 0.225]
 
--- FUNCIÓN DE INFERENCIA 
--- Esta función toma el modelo y UNA imagen, y devuelve la predicción.
--- La separamos para poder llamarla muchas veces dentro del loop.
-
-runInference :: ScriptModule -> FilePath -> IO ()
-runInference model inputfile = do
-  mimg <- readImageAsRGB8WithScaling inputfile 256 256 True
-  case mimg of
-    Left err -> putStrLn $ "Error al leer imagen: " ++ inputfile
-    Right (img_, _) -> do
-      let img' = centerCrop 224 224 img_
-          img'' = toType Float $ hwc2chw $ normalize $ divScalar (255.0 :: Float) $ toType Float $ fromDynImage $ I.ImageRGB8 img'
-      
-      case (forward model [IVTensor img'']) of
-        IVTensor v'' -> do
-          -- Obtenemos el Top 1
-          let (_, idxs') = topK 1 (Dim 1) True True $ softmax (Dim 1) v''
-              idxs = asValue idxs' :: [[Int]]
-              index = (idxs !! 0) !! 0
-          
-          -- Imprimimos la etiqueta
-          putStrLn (labels !! index)
-        
-        _ -> putStrLn "Error: El modelo no devolvió un tensor."
-
-
 main :: IO ()
 main = do
-  rawArgs <- getArgs
-  
-  let (modelfile, imageFiles) = case rawArgs of
-        -- CASO 1: Sin argumentos -> Usamos los defaults 
-        [] -> ("resnet_model.pt", ["elephant.jpg"])
-        
-        -- CASO 2: Argumentos dados -> El primero es modelo, el resto son imágenes
-        -- (m:is) significa "Cabeza (modelo)" y "Cola (lista de imagenes)"
-        (m:is) | not (null is) -> (m, is)
-        
-        -- CASO 3: Error
-        _ -> error "Uso: ./load-torchscript model-file image-file [image-file2 ...]"
+  let opt = \case
+        [] -> ["resnet_model.pt", "elephant.jpg"] --Red Neuronal Convolucional (CNN) cerebro congelado
+        a@[model', input'] -> a
+        _ -> error $ "Usage: load-torchscript model-file image-file"
+  [modelfile, inputfile] <- opt <$> getArgs
+  model <- loadScript WithoutRequiredGrad modelfile --cargar modelo
 
-  -- 1. Cargar modelo (Solo una vez)
-  model <- loadScript WithoutRequiredGrad modelfile
-
-  -- 2. Procesar la lista (Batch)
-  -- Si cayó en el CASO 1, procesará solo ["elephant.jpg"]
-  -- Si cayó en el CASO 2, procesará ["img1.jpg", "img2.jpg", "img3.jpg"...]
-  mapM_ (runInference model) imageFiles
-
+  mimg <- readImageAsRGB8WithScaling inputfile 256 256 True --cargar image
+  case mimg of
+    Left err -> print err
+    Right (img_, _) -> do
+      let img' = centerCrop 224 224 img_ -- escalado de la imagen
+          -- convierte a tensor y normalizacion
+          img'' = toType Float $ hwc2chw $ normalize $ divScalar (255.0 :: Float) $ toType Float $ fromDynImage $ I.ImageRGB8 img'
+      case (forward model [IVTensor img'']) of --pensamiento
+        IVTensor v'' -> do
+          let (scores', idxs') = topK 5 (Dim 1) True True $ softmax (Dim 1) v''
+              scores = asValue scores' :: [[Float]] --tensores a listas
+              idxs = asValue idxs' :: [[Int]]
+          print "--labels--"
+          print $ map (labels !!) $ idxs !! 0 --indices para las etiquetas
+          print "--scores--"
+          print scores'
+        _ -> print "Return value is not tensor."
 
 labels :: [String] --evaluacion perezosa
 labels =

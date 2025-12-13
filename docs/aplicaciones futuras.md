@@ -1,14 +1,6 @@
-Aquí tienes un documento `APPLICATIONS.md` (o una sección para tu `README.md` principal) redactado profesionalmente.
-
-He analizado los enlaces que me diste y he conectado cada uno con tu proyecto para justificar **por qué tu arquitectura híbrida (Haskell/Python)** es relevante en esos campos.
-
----
-
 # 🌍 Impacto, Aplicaciones y Público Objetivo
 
 Este proyecto trasciende el ejercicio académico de clasificar razas de gatos. La arquitectura desarrollada —un núcleo de inferencia robusto y compilado (Haskell) orquestado por una interfaz flexible (Python)— representa un prototipo funcional de sistemas utilizados hoy en día en la industria y la ciencia.
-
-A continuación se detallan los casos de uso reales validados por la literatura actual.
 
 ## 🚀 1. Aplicaciones en el Mundo Real
 
